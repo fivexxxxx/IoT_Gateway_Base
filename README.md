@@ -3,20 +3,14 @@
 # 中文版本 (Chinese Version)
 
 ```markdown
-# Xlab-Core (V0.1)
-
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]() 
-[![License](https://img.shields.io/badge/license-MIT-blue)]() 
-[![C Standard](https://img.shields.io/badge/C-11-ff69b4)]() 
-[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)]()
 
 ## 项目概述
 
-Xlab-Core (V0.1) 是 Xlab 边缘网关项目的基础南向网络接入与二进制协议解析框架。剥离了沉重的云端连接与持久化层，V0.1 纯粹专注于在资源受限的 Linux 环境下实现最大吞吐量、确定性延迟以及健壮的二进制协议解析。
+这是边缘网关项目的基础南向网络接入与二进制协议解析框架。剥离了沉重的云端连接与持久化层，纯粹专注于在资源受限的 Linux 环境下实现最大吞吐量、确定性延迟以及健壮的二进制协议解析。
 
 它作为一个超轻量级、零外部依赖的网络底座，为后续版本中引入的高级特性（MQTT、断网续传、Web API）提供了坚实的演进基础。
 
-## 核心功能 (V0.1 基线)
+## 核心功能 (基线)
 
 ### 高性能 Reactor 引擎
 - **多核 Reactor 模型**：独立的主线程负责连接接收与分发；Worker 线程池通过 `epoll` 处理 I/O 多路复用。
