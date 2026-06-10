@@ -1,0 +1,16 @@
+# 编译生成的目标文件
+*.o
+*.out
+*.elf
+*.bin
+*.hex
+
+# 编译目录
+build/
+Debug/
+Release/
+
+# 编辑器临时文件
+*.swp
+*~
+.DS_Store
