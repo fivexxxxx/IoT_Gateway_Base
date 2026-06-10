@@ -1,0 +1,77 @@
+# ============================================================================
+# 原生编译配置 (Ubuntu x86_64 Linux)
+# ============================================================================
+# 使用系统默认 GCC (原生编译，无需交叉工具链)
+CC      ?= gcc
+AR      ?= ar
+STRIP   ?= strip
+
+# 基础标志 
+BASE_CFLAGS := -Wall -Wextra -Werror -std=c11 -D_GNU_SOURCE -D_DEFAULT_SOURCE -O2 -DNDEBUG
+
+#  忽略未使用参数警告 (POSIX 线程回调标准做法，已通过验证)
+override CFLAGS := $(BASE_CFLAGS) -Wno-unused-parameter
+
+# 头文件搜索路径
+INCLUDE := -I./include -I./src $(addprefix -I, $(shell find ./include -mindepth 1 -type d 2>/dev/null))
+
+# 链接标志 
+STATIC  ?= 1
+LDFLAGS := -lpthread
+ifeq ($(STATIC), 1)
+  LDFLAGS += -static
+endif
+
+# 目标命名 
+DEBUG   ?= 0
+ifeq ($(DEBUG), 1)
+  override CFLAGS := -Wall -Wextra -std=c11 -D_GNU_SOURCE -D_DEFAULT_SOURCE -g -O0 -DDEBUG -Wno-unused-parameter
+  TARGET  := server_linux_debug
+else
+  override CFLAGS := -Wall -Wextra -Werror -std=c11 -D_GNU_SOURCE -D_DEFAULT_SOURCE -O2 -DNDEBUG -Wno-unused-parameter
+  TARGET  := server_linux
+endif
+
+# ============================================================================
+# 自动收集源文件与目标文件
+# ============================================================================
+# 注：若 .c 文件直接放在项目根目录，请将 src 改为 .
+SRCS    := $(shell find src -name '*.c' 2>/dev/null) $(wildcard *.c)
+OBJS    := $(SRCS:.c=.o)
+DEPS    := $(OBJS:.o=.d)
+
+# ============================================================================
+# 构建规则
+# ============================================================================
+.PHONY: all clean strip deploy
+
+all: $(TARGET)
+
+# 链接
+$(TARGET): $(OBJS)
+	$(CC) $^ -o $@ $(LDFLAGS)
+	@echo " Native build success: $@ ($(if $(filter 1,$(DEBUG)),Debug,Release)) for Ubuntu Linux"
+
+# 编译 
+%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDE) -MMD -MP -c $< -o $@
+
+# 包含自动生成的依赖文件
+-include $(DEPS)
+
+# 体积裁剪 
+strip: $(TARGET)
+	$(STRIP) $<
+	@echo " Stripped binary: $< (size reduced)"
+
+# 部署/运行提示
+deploy: $(TARGET)
+	@echo " Linux binary ready. Run directly:"
+	@echo "   ./$(TARGET)"
+
+# 清理构建产物
+clean:
+	rm -f $(OBJS) $(DEPS) $(TARGET)
+	find . -type d -empty -delete 2>/dev/null || true
+	@echo " Cleaned."
