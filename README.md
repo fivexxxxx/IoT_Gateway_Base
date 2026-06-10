@@ -1,1 +1,68 @@
-IOT_GATEWAY
+
+
+# 中文版本 (Chinese Version)
+
+```markdown
+# Xlab-Core (V0.1)
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]() 
+[![License](https://img.shields.io/badge/license-MIT-blue)]() 
+[![C Standard](https://img.shields.io/badge/C-11-ff69b4)]() 
+[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey)]()
+
+## 项目概述
+
+Xlab-Core (V0.1) 是 Xlab 边缘网关项目的基础南向网络接入与二进制协议解析框架。剥离了沉重的云端连接与持久化层，V0.1 纯粹专注于在资源受限的 Linux 环境下实现最大吞吐量、确定性延迟以及健壮的二进制协议解析。
+
+它作为一个超轻量级、零外部依赖的网络底座，为后续版本中引入的高级特性（MQTT、断网续传、Web API）提供了坚实的演进基础。
+
+## 核心功能 (V0.1 基线)
+
+### 高性能 Reactor 引擎
+- **多核 Reactor 模型**：独立的主线程负责连接接收与分发；Worker 线程池通过 `epoll` 处理 I/O 多路复用。
+- **传输层无关抽象**：统一的虚表抽象了 TCP（服务端/客户端）和 UDP 监听器，将网络 I/O 与业务逻辑彻底解耦。
+- **非阻塞 I/O**：严格的非阻塞 Socket 操作，确保事件循环永远不会被慢速客户端或网络抖动所阻塞。
+
+### 健壮的二进制协议栈
+- **自定义 IIoT 协议**：原生支持超紧凑的二进制帧格式（例如：`0xF0` 上行成功，`0xF4` 上行错误，`0x40` 下行指令）。
+- **FSM 流式解析器**：基于有限状态机 (FSM) 的逐字节解析器，完美处理 TCP 流式传输中的粘包与半包问题。
+- **数据完整性**：内置二进制补码校验和 (Checksum) 验证，用于检测载荷篡改。
+
+### 会话与内存管理
+- **连接生命周期**：从握手到断开的完整状态跟踪，包含基础的超时机制。
+- **动态配置**：轻量级 INI 解析器，用于读取运行时参数（端口、线程数、缓冲区大小）。
+- **异步日志基础**：非阻塞的控制台/文件日志输出，防止 I/O 操作停滞核心事件循环。
+
+## 架构设计
+
+V0.1 采用非对称多线程 Reactor 架构，确保网络事件循环保持极高的响应能力。
+
+```mermaid
+graph TD
+    subgraph 南向设备
+        PLC[PLC / 传感器]
+        RFID[RFID 读写器]
+    end
+
+    subgraph Xlab-Core V0.1 引擎
+        Main[主线程<br/>epoll: Accept & 分发]
+        
+        subgraph Worker 线程池
+            W1[Worker 1<br/>epoll: 读写]
+            W2[Worker 2<br/>epoll: 读写]
+        end
+        
+        Parser[协议 FSM 解析器]
+        Router[命令路由器]
+    end
+
+    PLC -->|TCP/UDP| Main
+    RFID -->|TCP/UDP| Main
+    Main -->|分发 FD| W1
+    Main -->|分发 FD| W2
+    W1 -->|原始字节流| Parser
+    W2 -->|原始字节流| Parser
+    Parser -->|解析后的结构体| Router
+## AI总结 嘿嘿
+	
+	
