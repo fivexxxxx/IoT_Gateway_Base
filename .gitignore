@@ -1,16 +1,22 @@
-# 编译生成的目标文件
+# 编译生成的目标文件和依赖文件
 *.o
+*.d          <--- 加上这一行
+*.obj
 *.out
 *.elf
 *.bin
 *.hex
+*.exe
+*.map        <--- 链接生成的映射文件，通常也不需要上传
 
 # 编译目录
 build/
 Debug/
 Release/
+obj/
 
 # 编辑器临时文件
 *.swp
 *~
 .DS_Store
+Thumbs.db
